@@ -46,6 +46,7 @@ Here are some defensive steps you can take to avoid these mysterious breakings a
 
 ### Tip 1
 Make all model fields optional e.g.:
+
 ```swift
 struct QuoteModel: Codable {
     let id: Int?
@@ -58,6 +59,7 @@ This will prevent `JSONDecoder.decode()` from throwing an exception when it enco
 
 ### Tip 2
 Make view model intializers failable e.g.:
+
 ```swift
 struct QuoteViewModel {
     let attributedQuote: String
@@ -78,6 +80,7 @@ let viewModel = models.compactMap { QuoteViewModel(quoteModel: $0) }
 
 ### Tip 3
 If you're interested in knowing what data is missing from an API add a `valideate()` method to the view model's failable initializer e.g.:
+
 ```swift
 extension QuoteViewModel {
 
