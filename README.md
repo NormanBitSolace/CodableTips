@@ -1,4 +1,4 @@
-# CodableTips
+# Codable Tips
 
 Swift 4 added the `Codable` protocol that automatically handles binding Data to custom model types. A typical example of this is binding JSON returned from a REST call to a model. Swift's `JSONDecoder.decode()` implements all the functionality required, e.g.:
 
