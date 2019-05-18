@@ -19,7 +19,7 @@ struct QuoteModel: Codable {
     let quote: String
 }
 ```
-Additionally, `JSONDecoder.decode()` allows us to just bind the properties we're interested in. For example, if we're not interested in the `id` property we can bind to:
+Additionally, `JSONDecoder.decode()` allows us to just bind the fields we're interested in. For example, if we're not interested in the `id` field we can bind to:
 
 ```swift
 struct QuoteModel: Codable {
@@ -27,24 +27,25 @@ struct QuoteModel: Codable {
     let quote: String
 }
 ```
-Conversly, an exception is thrown if the model contains a new property e.g. `anotherProperty` that is not in the JSON:
+Conversly, an exception is thrown if the model contains a field the data doesn't e.g. `extraField` that is not in the JSON:
 
 ```swift
 struct QuoteModel: Codable {
     let author: String
     let quote: String
-    let anotherProperty: String
+    let extraField: String
 }
 ```
-The thrown error "`The data couldn’t be read because it is missing.`" doesn't provide much information about what caused the exception.
+Additionally, the thrown error "`The data couldn’t be read because it is missing.`" doesn't provide much information about what caused the exception.
 
-Similarly, if a property type doesn't match the server's type the error "`The data couldn’t be read because it isn’t in the correct format.`" is thrown.
+Similarly, if a model field's type doesn't match the JSON's field type the error "`The data couldn’t be read because it isn’t in the correct format.`" is thrown, without any information about which field has the incorrect type.
 
-API you depend on can change without warning. This is particuarly true when the API is in development. An app that ran used to run may break even though no code changes were made. They can be hard to track down, especially given that the localized error messages do not provide information to help.
+API you depend on can change without warning. This is particuarly true when the API is in development. An app that used to run may break even though no code changes were made. Such errors can be hard to track down, especially given that the localized error messages do not provide pertinent info.
 
-Here are some defensive steps you can take to avoid these mysterious breakings and to help you know when the server's data structure has changed.
+Here are some defensive steps you can take to avoid these mysterious breakings and to help you know when the server's JSON structure has changed.
 
 ### Tip 1
+### Prevent missing fields exceptions.
 Make all model fields optional e.g.:
 
 ```swift
@@ -52,13 +53,14 @@ struct QuoteModel: Codable {
     let id: Int?
     let author: String?
     let quote: String?
-    let anotherProperty: String?
+    let extraField: String?
 }
 ```
-This will prevent `JSONDecoder.decode()` from throwing an exception when it encounters missing properties in the JSON.
+This will prevent `JSONDecoder.decode()` from throwing an exception when it encounters missing fields in the JSON.
 
 ### Tip 2
-Make view model intializers failable e.g.:
+#### Filter out malformed data
+Use failable initializers for view model e.g.:
 
 ```swift
 struct QuoteViewModel {
@@ -79,23 +81,12 @@ let viewModel = models.compactMap { QuoteViewModel(quoteModel: $0) }
 ```
 
 ### Tip 3
-If you're interested in knowing what data is missing from an API add a `valideate()` method to the view model's failable initializer e.g.:
+#### Use Xcode debugger Quick Look to examine data
+Viewing `Data` in the debugger doesn't reveal information about the `Data`'s contents. Xcode's `Data` Quick Look plugin helps visualize `Data` content.
+Click the Quick Look icon ![image](https://user-images.githubusercontent.com/2135673/57973249-f969f880-795a-11e9-991b-7c60962070a1.png) to see a visualization of the `Data`'s content:
 
-```swift
-extension QuoteViewModel {
+![image](https://user-images.githubusercontent.com/2135673/57973307-ca07bb80-795b-11e9-830a-fb30dfe9c20d.png)
 
-    private func validate(quoteModel: QuoteModel) {
-        assert(quoteModel.author != nil, "Data missing 'author'.")
-        assert(quoteModel.author?.count == 0 , "Data 'author' property is empty.")
-        assert(quoteModel.quote != nil, "Data missing 'quote'.")
-        assert(quoteModel.quote?.count == 0 , "Data 'quote' property is empty.")
-    }
-
-    init?(quoteModel: QuoteModel) {
-        validate(quoteModel: quoteModel)
-        guard let author = quoteModel.author, let quote = quoteModel.quote else { return nil }
-        guard author.count > 0, quote.count > 0 else { return nil }
-        attributedQuote = "\(quote) –\(author)"
-    }
-}
-```
+### Todo
+1. Add support for incorrect types
+1. Add support for logging missing data to console.
