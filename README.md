@@ -87,6 +87,24 @@ Click the Quick Look icon ![image](https://user-images.githubusercontent.com/213
 
 ![image](https://user-images.githubusercontent.com/2135673/57973307-ca07bb80-795b-11e9-830a-fb30dfe9c20d.png)
 
+
+### Tip 4
+#### Mixed CRUD operations
+When alternating between GET, POST, PUT and DELETE REST API it is often helpful to log the full URL with parameters and the HTTP method.
+```swift
+extension URLSession {
+    open func dataTaskDebug(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+        print("\(request.httpMethod ?? "method unspecified") \(request.url?.absoluteString ?? "nil URL")")
+        return URLSession.shared.dataTask(with: request, completionHandler: completionHandler)
+    }
+
+}
+```
+
+### Miscellaneous
+
+> When showing an issue to the team responsible for the API layer, demonstrate the problem with a REST client like RESTED, it eliminates any discussion of where the issue actually lies.
+
 ### Todo
 1. Add support for incorrect types
 1. Add support for logging missing data to console.
